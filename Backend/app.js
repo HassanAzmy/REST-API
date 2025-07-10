@@ -1,5 +1,5 @@
 import express from "express";
-import feedRouter from './router/feed-router.js';
+import feedRouter from './routes/feed-router.js';
 
 const app = express(); 
 
