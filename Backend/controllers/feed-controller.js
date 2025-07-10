@@ -68,20 +68,27 @@ export async function getPost(req, res, next) {
  */
 export async function createPost(req, res, next) {
    try {
+      const { title } = req.body;
+      const { content } = req.body;
+      const image = req.file;
+
       const errors = validationResult(req);
-      if(!errors.isEmpty()) {
-         const error = new Error('Invalid data for creating post');
+      if(!errors.isEmpty() || !image) {
+         let message = 'Invalid data for creating post';
+         if(!image) {
+            message = 'Invalid image format';
+         }
+         const error = new Error(message);
          error.statusCode = 422;
          throw error;
       }
-
-      const { title } = req.body;
-      const { content } = req.body;
-
+      
+      const imageUrl = image.path.replace(/\\/g, "/");
+      console.log(imageUrl);
       const post = new Post({
          title: title,
          content: content,
-         imageUrl: 'images/Hitman.png',
+         imageUrl: imageUrl,
          creator: {
             name: 'Azmy'
          }
