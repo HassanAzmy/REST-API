@@ -1,4 +1,5 @@
 import express from "express";
+import Post from "../models/post-model.js";
 import { validationResult } from "express-validator";
 
 /** @param {express.Request} req */
@@ -35,18 +36,19 @@ export async function createPost(req, res, next) {
    const { title } = req.body;
    const { content } = req.body;
 
+   const post = new Post({
+      title: title,
+      content: content,
+      imageUrl: 'images/Hitman.png',
+      creator: {
+         name: 'Azmy'
+      }
+      //* The createdAt is done by mongoose through timestamps:true
+   });
+   const result = await post.save();
    
-   // create post in db
    res.status(201).json({
-      message: 'Post created successfully!',
-      post: {
-         _id: new Date().toISOString(),
-         title,
-         content,
-         creator: {
-            name: 'Azmy'
-         },
-         createdAt: new Date()
-      },
+      message: 'Post Created Successfully',
+      post: result
    });
 }
