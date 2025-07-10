@@ -25,30 +25,36 @@ export async function getPosts(req, res, next) {
  * @param {express.Response} res
  */
 export async function createPost(req, res, next) {
-   const errors = validationResult(req);
-   if(!errors.isEmpty()) {
-      res.status(422).json({
-         message: 'Validation failed',
-         errors: errors.array()
-      });
-   }
-
-   const { title } = req.body;
-   const { content } = req.body;
-
-   const post = new Post({
-      title: title,
-      content: content,
-      imageUrl: 'images/Hitman.png',
-      creator: {
-         name: 'Azmy'
+   try {
+      const errors = validationResult(req);
+      if(!errors.isEmpty()) {
+         const error = new Error('Validation failed.');
+         error.statusCode = 422;
+         throw error;
       }
-      //* The createdAt is done by mongoose through timestamps:true
-   });
-   const result = await post.save();
-   
-   res.status(201).json({
-      message: 'Post Created Successfully',
-      post: result
-   });
+
+      const { title } = req.body;
+      const { content } = req.body;
+
+      const post = new Post({
+         title: title,
+         content: content,
+         imageUrl: 'images/Hitman.png',
+         creator: {
+            name: 'Azmy'
+         }
+         //* The createdAt is done by mongoose through timestamps:true
+      });
+      const result = await post.save();
+      
+      res.status(201).json({
+         message: 'Post Created Successfully',
+         post: result
+      });
+   } catch(err) {
+      if(!err.statusCode) {
+         err.statusCode = 500 //* server-side error
+      }
+      next(err);
+   }
 }
