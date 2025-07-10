@@ -1,7 +1,12 @@
 import express from "express";
+import dotenv from 'dotenv';
 import feedRouter from './routes/feed-router.js';
 
-const app = express(); 
+dotenv.config();
+const PORT = process.env.PORT || 3000;
+
+
+const app = express();
 
 // app.use(express.urlencoded());   //? Useful for requests that hold data in the format of | x-www-form-urlencoded | through <form> post requests
 app.use(express.json());            //? Useful for Content-Type of application/json 
@@ -20,4 +25,4 @@ app.use((req, res, next) => {
 
 app.use('/feed', feedRouter);
 
-app.listen(8080);
+app.listen(PORT);
