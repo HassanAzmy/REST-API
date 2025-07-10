@@ -1,10 +1,11 @@
 import express from "express";
 import dotenv from 'dotenv';
+import mongoose from "mongoose";
 import feedRouter from './routes/feed-router.js';
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;
-
+const MONGODB_URI = process.env.MONGODB_URI;
 
 const app = express();
 
@@ -25,4 +26,5 @@ app.use((req, res, next) => {
 
 app.use('/feed', feedRouter);
 
+await mongoose.connect(MONGODB_URI);
 app.listen(PORT);
