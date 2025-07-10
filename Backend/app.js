@@ -14,7 +14,7 @@ const app = express();
 // app.use(express.urlencoded());   //* Useful for requests that hold data in the format of | x-www-form-urlencoded | through <form> post requests
 app.use(express.json());            //* Useful for Content-Type of application/json 
 
-app.use('images', express.static(path.join(__dirname, 'images')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use((req, res, next) => {
    //* Allows any domain to access your API
@@ -31,7 +31,6 @@ app.use((req, res, next) => {
 app.use('/feed', feedRouter);
 
 app.use((error, req, res, next) => {
-   console.log(error);
    const status = error.statusCode || 500;
    const message = error.message;
    res.status(status).json({

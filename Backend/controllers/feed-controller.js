@@ -2,22 +2,64 @@ import express from "express";
 import Post from "../models/post-model.js";
 import { validationResult } from "express-validator";
 
-/** @param {express.Request} req */
+
+/**
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 export async function getPosts(req, res, next) {
-   res.status(200).json({
-      posts: [
-         {
-            _id: '1',
-            title: 'First Post',
-            content: 'This is the first post!',
-            imageUrl: 'images/Hitman.png',
-            creator: {
-               name: 'Azmy'
-            },
-            createdAt: new Date()
-         },
-      ]
-   });
+   try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         const error = new Error('Rendering a post failed');
+         error.statusCode = 422;
+         throw error;
+      }
+
+      const posts = await Post.find().limit(3);
+      res.status(200).json({
+         message: 'Fetched posts successfully',
+         posts: posts
+      });
+   } catch (err) {
+      if (!err.statusCode) {
+         err.statusCode = 500;
+      }
+      next(err);
+   }
+}
+
+/**
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
+export async function getPost(req, res, next) {
+   try {
+      const errors = validationResult(req);
+      if(!errors.isEmpty()) {
+         const error = new Error('Rendering a post failed');
+         error.statusCode = 422; //* the data is incorrect or fails validation
+         throw error;
+      }
+
+      const postId = req.params.postId;
+      const post = await Post.findById(postId);
+
+      if(!post) {
+         const error = new Error('Post is not found');
+         error.statusCode = 404; //* Server cannot find req resource
+         throw error;
+      }
+
+      res.status(200).json({     //* Successful req
+         post: post
+      });
+   } catch (err) {
+      if(!err.statusCode) {
+         err.statusCode = 500;   //* Internal unexpected server error
+      }
+      next(err);
+   }
 }
 
 /**
@@ -28,7 +70,7 @@ export async function createPost(req, res, next) {
    try {
       const errors = validationResult(req);
       if(!errors.isEmpty()) {
-         const error = new Error('Validation failed.');
+         const error = new Error('Invalid data for creating post');
          error.statusCode = 422;
          throw error;
       }
@@ -47,7 +89,7 @@ export async function createPost(req, res, next) {
       });
       const result = await post.save();
       
-      res.status(201).json({
+      res.status(201).json({  //* Successful req and a new resource was created
          message: 'Post Created Successfully',
          post: result
       });
