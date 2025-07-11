@@ -1,10 +1,10 @@
 import express from "express";
 import dotenv from 'dotenv';
 import mongoose from "mongoose";
-import feedRouter from './routes/feed-router.js';
 import multer from "multer";
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import feedRouter from './routes/feed-router.js';
+import authRouter from './routes/auth-router.js';
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;
@@ -53,6 +53,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/feed', feedRouter);
+app.use('/auth', feedRouter);
 
 app.use((error, req, res, next) => {
    const status = error.statusCode || 500;
