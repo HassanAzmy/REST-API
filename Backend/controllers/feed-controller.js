@@ -160,6 +160,43 @@ export async function updatePost(req, res, next) {
  * @param {express.Request} req
  * @param {express.Response} res
  */
+export async function deletePost(req, res, next) {
+   try {
+      const { postId } = req.params;      
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         const error = new Error('Invalid data for creating post');
+         error.statusCode = 422;
+         throw error;
+      }
+
+      const post = await Post.findById(postId);
+      if(!post) {
+         const error = new Error('Post not found');
+         error.statusCode = 422;
+         throw error;
+      }
+
+      clearImage(post.imageUrl);
+      const result = await Post.findByIdAndDelete(postId);        
+      
+      res.status(200).json({  //* Successful req and a new resource was created
+         message: 'Post deleted Successfully',
+         post: result
+      });
+   } catch (err) {
+      if (!err.statusCode) {
+         err.statusCode = 500 //* server-side error
+      }
+      next(err);
+   }
+}
+
+/**
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 export async function clearImage(filePath) {
    try {
       const __dirname = import.meta.dirname;

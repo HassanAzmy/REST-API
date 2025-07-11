@@ -26,4 +26,6 @@ router.put('/post/:postId', [
       .isLength({ min: 5 })
 ], feedController.updatePost);
 
+router.delete('/post/:postId', feedController.deletePost);
+
 export default router;
