@@ -1,4 +1,6 @@
 import express from "express";
+import fs from 'fs';
+import path from 'path';
 import Post from "../models/post-model.js";
 import { validationResult } from "express-validator";
 
@@ -16,7 +18,7 @@ export async function getPosts(req, res, next) {
          throw error;
       }
 
-      const posts = await Post.find().limit(3);
+      const posts = await Post.find().limit(4);
       res.status(200).json({
          message: 'Fetched posts successfully',
          posts: posts
@@ -42,7 +44,7 @@ export async function getPost(req, res, next) {
          throw error;
       }
 
-      const postId = req.params.postId;
+      const {postId} = req.params;
       const post = await Post.findById(postId);
 
       if(!post) {
@@ -84,7 +86,6 @@ export async function createPost(req, res, next) {
       }
       
       const imageUrl = image.path.replace(/\\/g, "/");
-      console.log(imageUrl);
       const post = new Post({
          title: title,
          content: content,
@@ -105,5 +106,66 @@ export async function createPost(req, res, next) {
          err.statusCode = 500 //* server-side error
       }
       next(err);
+   }
+}
+
+/**
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
+export async function updatePost(req, res, next) {
+   try {
+      const { postId } = req.params;
+      const { title } = req.body;
+      const { content } = req.body;
+      const image = req.file;
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         const error = new Error('Invalid data for creating post');
+         error.statusCode = 422;
+         throw error;
+      }
+      
+      const oldPost = await Post.findById(postId);
+      if(!oldPost) {         
+         const error = new Error('Post not found');
+         error.statusCode = 404;
+         throw error;
+      }
+      
+      if(image) {                  
+         clearImage(oldPost.imageUrl);
+         const imageUrl = image.path.replace(/\\/g, "/");
+         oldPost.imageUrl = imageUrl;
+      }
+      
+      oldPost.title = title;
+      oldPost.content = content;
+      const result = await oldPost.save();
+      
+      res.status(201).json({  //* Successful req and a new resource was created
+         message: 'Post Updated Successfully',
+         post: result
+      });
+   } catch (err) {
+      if (!err.statusCode) {
+         err.statusCode = 500 //* server-side error
+      }
+      next(err);
+   }
+}
+
+/**
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
+export async function clearImage(filePath) {
+   try {
+      const __dirname = import.meta.dirname;
+      filePath = path.join(__dirname, '..', filePath);
+      fs.unlink(filePath, err => console.log(err));
+   } catch (err) {
+      
    }
 }
