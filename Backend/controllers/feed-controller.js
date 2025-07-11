@@ -4,6 +4,7 @@ import path from 'path';
 import Post from "../models/post-model.js";
 import { validationResult } from "express-validator";
 
+const NUMBER_OF_POSTS = 2;
 
 /**
  * @param {express.Request} req
@@ -11,6 +12,8 @@ import { validationResult } from "express-validator";
  */
 export async function getPosts(req, res, next) {
    try {
+      const page = req.query.page || 1;
+
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
          const error = new Error('Rendering a post failed');
@@ -18,10 +21,16 @@ export async function getPosts(req, res, next) {
          throw error;
       }
 
-      const posts = await Post.find().limit(4);
+      const totalPosts = await Post.find().countDocuments();
+
+      const posts = await Post.find()
+         .skip((page - 1) * NUMBER_OF_POSTS)
+         .limit(NUMBER_OF_POSTS);
+                  
       res.status(200).json({
          message: 'Fetched posts successfully',
-         posts: posts
+         posts: posts,
+         totalItems: totalPosts
       });
    } catch (err) {
       if (!err.statusCode) {
