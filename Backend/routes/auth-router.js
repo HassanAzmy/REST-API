@@ -10,7 +10,7 @@ router.put('/signup', [
       .isEmail()
       .custom(async (value, {req}) => {
          const user = await User.findOne({ email: value });
-         if (user) {                                    
+         if (user) {                    
             const error = new Error('Email already exists');
             error.statusCode = 409; //* Data conflict
             throw error;
@@ -26,5 +26,7 @@ router.put('/signup', [
       .not()
       .isEmpty()
 ], authController.signup);
+
+router.post('/login', authController.login);
 
 export default  router;
