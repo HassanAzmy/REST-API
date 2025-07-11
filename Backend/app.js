@@ -45,21 +45,24 @@ app.use((req, res, next) => {
    res.setHeader('Access-Control-Allow-Origin', '*');
 
    //* Specifies which HTTP methods are allowed when accessing the resource
-   res.setHeader('Access-Control-Allow-Methods', 'POST, PUT, PATCH, DELETE');
+   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
 
    //* Specifies which headers can be used in the actual request
    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
    next();
 });
 
 app.use('/feed', feedRouter);
-app.use('/auth', feedRouter);
+app.use('/auth', authRouter);
 
 app.use((error, req, res, next) => {
    const status = error.statusCode || 500;
    const message = error.message;
+   const data = error.data;
    res.status(status).json({
-      message: message
+      message,
+      data
    });
 })
 
