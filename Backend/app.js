@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import mongoose from "mongoose";
 import multer from "multer";
 import path from 'path';
+import cors from 'cors';
 import feedRouter from './routes/feed-router.js';
 import authRouter from './routes/auth-router.js';
 
@@ -39,19 +40,16 @@ app.use(express.json());            //* Useful for Content-Type of application/j
 app.use(multer({storage: fileStorage, fileFilter: fileFilter}).single('image'));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-
-app.use((req, res, next) => {
+app.use(cors({
    //* Allows any domain to access your API
-   res.setHeader('Access-Control-Allow-Origin', '*');
+   origin: '*',
 
    //* Specifies which HTTP methods are allowed when accessing the resource
-   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 
    //* Specifies which headers can be used in the actual request
-   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-   next();
-});
+   allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use('/feed', feedRouter);
 app.use('/auth', authRouter);
