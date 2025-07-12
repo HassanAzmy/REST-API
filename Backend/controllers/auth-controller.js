@@ -62,13 +62,7 @@ export async function login(req, res, next) {
       const { email } = req.body;
       const { password } = req.body;
       
-      const user = await User.findOne({email: email});
-      if(!user) {
-         const error = new Error('Invalid input');
-         error.statusCode = 401; //* not authenticated
-         error.data = errors.array();
-         throw error;
-      }
+      const user = await User.findOne({email: email});      
 
       const isMatch = await compare(password, user.password);
       if(!isMatch) {
