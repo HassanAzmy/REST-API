@@ -1,7 +1,11 @@
 import express from "express";
+import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 import {hash, compare} from 'bcryptjs';
 import User from '../models/user-model.js';
 import { validationResult } from "express-validator";
+
+dotenv.config();
 
 /**
  * @param {express.Request} req
@@ -74,10 +78,22 @@ export async function login(req, res, next) {
          throw error;
       }
 
-      // res.status(201).json({
-      //    message: 'User created successfully',
-      //    userId: result._id
-      // });
+      const token = jwt.sign(
+         {
+            email: user.email,
+            userId: user._id.toString()
+         }, 
+         process.env.JWT_SECRET,
+         {
+            expiresIn: '1h'
+         }
+      );
+
+      res.status(200).json({
+         message: 'Login successfully',
+         token,
+         userId: user._id.toString()
+      });
    } catch (err) {
       if (!err.statusCode) {
          err.statusCode = 500;
