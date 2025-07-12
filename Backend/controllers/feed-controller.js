@@ -2,6 +2,7 @@ import express from "express";
 import fs from 'fs';
 import path from 'path';
 import Post from "../models/post-model.js";
+import User from "../models/user-model.js";
 import { validationResult } from "express-validator";
 
 const NUMBER_OF_POSTS = 2;
@@ -81,6 +82,7 @@ export async function createPost(req, res, next) {
    try {
       const { title } = req.body;
       const { content } = req.body;
+      const { userId } = req;
       const image = req.file;
 
       const errors = validationResult(req);
@@ -99,16 +101,22 @@ export async function createPost(req, res, next) {
          title: title,
          content: content,
          imageUrl: imageUrl,
-         creator: {
-            name: 'Azmy'
-         }
+         creator: userId
          //* The createdAt is done by mongoose through timestamps:true
       });
-      const result = await post.save();
+
+      await post.save();
+      const user = await User.findById(userId);
+      user.posts.push(post);  //* mongoose will extract the _id
+      await user.save();
       
       res.status(201).json({  //* Successful req and a new resource was created
          message: 'Post Created Successfully',
-         post: result
+         post,
+         creator: {
+            _id: user._id,
+            name: user.name
+         }
       });
    } catch(err) {
       if(!err.statusCode) {
