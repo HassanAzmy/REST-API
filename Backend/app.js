@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import multer from "multer";
 import path from 'path';
 import cors from 'cors';
+import { Server } from 'socket.io';
 import feedRouter from './routes/feed-router.js';
 import authRouter from './routes/auth-router.js';
 
@@ -65,4 +66,15 @@ app.use((error, req, res, next) => {
 })
 
 await mongoose.connect(MONGODB_URI);
-app.listen(PORT);
+const server = app.listen(PORT);
+const io = new Server(server, {
+   cors: {
+      origin: '*'
+   }
+});
+
+//* connection means to wait for new connections so whenever a new client connects to us
+//* sokcet is the client that did connect 
+io.on('connection', socket => {
+   console.log('Client connected');   
+})
