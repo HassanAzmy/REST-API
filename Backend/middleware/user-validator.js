@@ -36,5 +36,11 @@ export const userValidationRules = {
                throw error;
             }
          }),
+   ],
+   updateStatus: [
+      body('status')
+         .trim()
+         .not()
+         .isEmpty()
    ]
 };

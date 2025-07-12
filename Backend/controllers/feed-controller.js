@@ -218,3 +218,57 @@ export async function clearImage(filePath) {
       
    }
 }
+
+/**
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
+export async function getStatus(req, res, next) {
+   try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         const error = new Error('Rendering a post failed');
+         error.statusCode = 422; //* the data is incorrect or fails validation
+         throw error;
+      }
+
+      const { userId } = req;
+      const user = await User.findById(userId);
+
+      res.status(200).json({
+         status: user.status
+      });
+   } catch (err) {      
+      err.statusCode = err.statusCode || 500;      
+      next(err);
+   }
+}
+
+/**
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
+export async function updateStatus(req, res, next) {
+   try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+         const error = new Error('Rendering a post failed');
+         error.statusCode = 422; //* the data is incorrect or fails validation
+         throw error;
+      }
+
+      const { userId } = req;
+      const { status } = req.body;
+
+      const user = await User.findById(userId);
+      user.status = status;
+      await user.save();
+
+      res.status(200).json({
+         message: 'Status updated successfully'
+      });
+   } catch (err) {
+      err.statusCode = err.statusCode || 500;
+      next(err);
+   }
+}
