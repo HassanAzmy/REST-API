@@ -7,6 +7,7 @@ import cors from 'cors';
 import { Server } from 'socket.io';
 import feedRouter from './routes/feed-router.js';
 import authRouter from './routes/auth-router.js';
+import { socket } from './socket.js';
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;
@@ -67,14 +68,10 @@ app.use((error, req, res, next) => {
 
 await mongoose.connect(MONGODB_URI);
 const server = app.listen(PORT);
-const io = new Server(server, {
-   cors: {
-      origin: '*'
-   }
-});
+const io = socket.init(server);
 
 //* connection means to wait for new connections so whenever a new client connects to us
 //* sokcet is the client that did connect 
 io.on('connection', socket => {
-   console.log('Client connected');   
+   console.log('Client connected');
 })

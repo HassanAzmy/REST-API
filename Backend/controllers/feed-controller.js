@@ -4,6 +4,7 @@ import path from 'path';
 import Post from "../models/post-model.js";
 import User from "../models/user-model.js";
 import { validationResult } from "express-validator";
+import { socket } from '../socket.js';
 
 const NUMBER_OF_POSTS = 2;
 
@@ -25,6 +26,7 @@ export async function getPosts(req, res, next) {
       const totalPosts = await Post.find().countDocuments();
 
       const posts = await Post.find()
+         .populate('creator')
          .skip((page - 1) * NUMBER_OF_POSTS)
          .limit(NUMBER_OF_POSTS);
                   
@@ -55,7 +57,7 @@ export async function getPost(req, res, next) {
       }
 
       const {postId} = req.params;
-      const post = await Post.findById(postId);
+      const post = await Post.findById(postId).populate('creator');
 
       if(!post) {
          const error = new Error('Post is not found');
@@ -110,6 +112,22 @@ export async function createPost(req, res, next) {
       user.posts.push(post);  //* mongoose will extract the _id
       await user.save();
       
+      //* sending a real-time event to all connected clients.
+      //* posts => the event name that clients must be listening for
+      //* {} => the data you're sending with that event.
+      socket.getIO().emit('posts', {
+         action: 'create',
+         post: {
+            //* ._doc => Gives you just the raw JSON-like object (the actual database fields)
+            //* without all the Mongoose overhead such as extra methods.
+            ...post._doc, 
+            creator: {
+               _id: userId,
+               name: user.name
+            }
+         }
+      });
+
       res.status(201).json({  //* Successful req and a new resource was created
          message: 'Post Created Successfully',
          post,
