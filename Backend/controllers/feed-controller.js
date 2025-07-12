@@ -144,26 +144,21 @@ export async function updatePost(req, res, next) {
          throw error;
       }
       
-      const oldPost = await Post.findById(postId);
-      if(!oldPost) {         
-         const error = new Error('Post not found');
-         error.statusCode = 404;
-         throw error;
-      }
-      
-      if(image) {                  
-         clearImage(oldPost.imageUrl);
+      const post = await Post.findById(postId);      
+            
+      if(image) {
+         clearImage(post.imageUrl);
          const imageUrl = image.path.replace(/\\/g, "/");
-         oldPost.imageUrl = imageUrl;
+         post.imageUrl = imageUrl;
       }
       
-      oldPost.title = title;
-      oldPost.content = content;
-      const result = await oldPost.save();
+      post.title = title;
+      post.content = content;
+      await post.save();
       
       res.status(201).json({  //* Successful req and a new resource was created
          message: 'Post Updated Successfully',
-         post: result
+         post: post
       });
    } catch (err) {
       if (!err.statusCode) {
@@ -180,7 +175,7 @@ export async function updatePost(req, res, next) {
 export async function deletePost(req, res, next) {
    try {
       const { postId } = req.params;      
-
+      
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
          const error = new Error('Invalid data for creating post');
@@ -189,12 +184,6 @@ export async function deletePost(req, res, next) {
       }
 
       const post = await Post.findById(postId);
-      if(!post) {
-         const error = new Error('Post not found');
-         error.statusCode = 422;
-         throw error;
-      }
-
       clearImage(post.imageUrl);
       const result = await Post.findByIdAndDelete(postId);        
       
@@ -202,7 +191,7 @@ export async function deletePost(req, res, next) {
          message: 'Post deleted Successfully',
          post: result
       });
-   } catch (err) {
+   } catch (err) {      
       if (!err.statusCode) {
          err.statusCode = 500 //* server-side error
       }
