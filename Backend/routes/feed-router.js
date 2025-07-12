@@ -7,9 +7,13 @@ import Post from "../models/post-model.js";
 
 const router = express.Router();
 
-router.get('/posts', isAuth, feedController.getPosts);
+router.get('/posts', 
+   isAuth, 
+   feedController.getPosts);
 
-router.get('/post/:postId', isAuth, feedController.getPost);
+router.get('/post/:postId', 
+   isAuth, 
+   feedController.getPost);
 
 router.post('/post', 
    isAuth, 

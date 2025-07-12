@@ -184,6 +184,12 @@ export async function deletePost(req, res, next) {
       }
 
       const post = await Post.findById(postId);
+      const user = await User.findById(req.userId);
+
+      // user.posts = user.posts.filter(p => p.toString() !== postId.toString());
+      user.posts.pull(postId);
+      await user.save();
+
       clearImage(post.imageUrl);
       const result = await Post.findByIdAndDelete(postId);        
       
