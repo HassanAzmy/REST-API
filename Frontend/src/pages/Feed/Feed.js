@@ -47,6 +47,8 @@ class Feed extends Component {
         this.addPost(data.post);
       } else if(data.action === 'update') {
         this.updatePost(data.post);
+      } else if(data.action === 'delete') {
+        this.loadPosts();
       }
     })
   }
@@ -78,6 +80,10 @@ class Feed extends Component {
         posts: updatedPosts
       };
     });
+  }
+
+  deletePost = post => {
+    
   }
 
   loadPosts = direction => {
@@ -198,13 +204,6 @@ class Feed extends Component {
       })
       .then(resData => {
         console.log(resData);        
-        // const post = {
-        //   _id: resData.post._id,
-        //   title: resData.post.title,
-        //   content: resData.post.content,
-        //   creator: resData.post.creator,
-        //   createdAt: resData.post.createdAt
-        // };
         this.setState(prevState => {          
           return {
             isEditing: false,
@@ -244,10 +243,7 @@ class Feed extends Component {
       })
       .then(resData => {
         console.log(resData);
-        this.setState(prevState => {
-          const updatedPosts = prevState.posts.filter(p => p._id !== postId);
-          return { posts: updatedPosts, postsLoading: false };
-        });
+        this.loadPosts();
       })
       .catch(err => {
         console.log(err);

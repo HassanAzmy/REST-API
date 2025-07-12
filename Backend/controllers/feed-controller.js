@@ -27,6 +27,7 @@ export async function getPosts(req, res, next) {
 
       const posts = await Post.find()
          .populate('creator')
+         .sort({ createdAt: -1 })
          .skip((page - 1) * NUMBER_OF_POSTS)
          .limit(NUMBER_OF_POSTS);
                   
@@ -216,6 +217,11 @@ export async function deletePost(req, res, next) {
       clearImage(post.imageUrl);
       const result = await Post.findByIdAndDelete(postId);        
       
+      socket.getIO().emit('posts', {
+         action: 'delete',
+         post: postId
+      })
+
       res.status(200).json({  //* Successful req and a new resource was created
          message: 'Post deleted Successfully',
          post: result
