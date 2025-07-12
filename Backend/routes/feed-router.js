@@ -1,12 +1,13 @@
 import express from "express";
 import * as feedController from '../controllers/feed-controller.js';
 import {body} from 'express-validator';
+import { isAuth } from '../middleware/is-auth-middleware.js';
 
 const router = express.Router();
 
-router.get('/posts', feedController.getPosts);
+router.get('/posts', isAuth, feedController.getPosts);
 
-router.get('/post/:postId', feedController.getPost);
+router.get('/post/:postId', isAuth, feedController.getPost);
 
 router.post('/post', [
    body('title')
@@ -15,7 +16,7 @@ router.post('/post', [
    body('content')
       .trim()
       .isLength({min: 5})
-], feedController.createPost);
+], isAuth, feedController.createPost);
 
 router.put('/post/:postId', [
    body('title')
@@ -24,8 +25,8 @@ router.put('/post/:postId', [
    body('content')
       .trim()
       .isLength({ min: 5 })
-], feedController.updatePost);
+], isAuth, feedController.updatePost);
 
-router.delete('/post/:postId', feedController.deletePost);
+router.delete('/post/:postId', isAuth, feedController.deletePost);
 
 export default router;
