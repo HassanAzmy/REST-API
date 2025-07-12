@@ -162,7 +162,7 @@ export async function updatePost(req, res, next) {
          throw error;
       }
       
-      const post = await Post.findById(postId);      
+      const post = await Post.findById(postId).populate('creator');      
             
       if(image) {
          clearImage(post.imageUrl);
@@ -174,6 +174,11 @@ export async function updatePost(req, res, next) {
       post.content = content;
       await post.save();
       
+      socket.getIO().emit('posts', {
+         action: 'update',
+         post
+      });
+
       res.status(201).json({  //* Successful req and a new resource was created
          message: 'Post Updated Successfully',
          post: post
